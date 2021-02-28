@@ -38,23 +38,15 @@ class ProductServiceTest {
     }
 
     @Test
-    fun increment() {
+    fun update() {
         val service = ProductService(ProductDataGateway())
-        service.incrementBy(service.findBy(101), 3)
+        val info = service.findBy(101)
+        info.quantity += 2
+        service.update(info)
 
         val product = service.findBy(101)
         assertEquals("milk", product.name)
-        assertEquals(45, product.quantity)
-    }
-
-    @Test
-    fun decrement() {
-        val service = ProductService(ProductDataGateway())
-        service.decrementBy(service.findBy(101), 3)
-
-        val product = service.findBy(101)
-        assertEquals("milk", product.name)
-        assertEquals(39, product.quantity)
+        assertEquals(44, product.quantity)
     }
 
     ///

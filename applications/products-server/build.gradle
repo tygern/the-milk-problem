@@ -9,6 +9,7 @@ dependencies {
     compile project(":components:database-support")
 
     compile "io.ktor:ktor-freemarker:$ktor_version"
+    compile "io.ktor:ktor-jackson:$ktor_version"
 }
 
 jar {

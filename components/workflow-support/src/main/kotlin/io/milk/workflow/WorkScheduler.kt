@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class WorkScheduler<T>(private val finder: WorkFinder<T>, private val workers: MutableList<Worker<T>>, private val delay: Long = 10L) {
+class WorkScheduler<T>(private val finder: WorkFinder<T>, private val workers: List<Worker<T>>, private val delay: Long = 10L) {
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
     private val pool = Executors.newScheduledThreadPool(workers.size)
@@ -47,7 +47,7 @@ class WorkScheduler<T>(private val finder: WorkFinder<T>, private val workers: M
 
             finder.findRequested(worker.name).forEach {
 
-                logger.info("found work for {}", worker.name)
+                logger.debug("found work for {}", worker.name)
 
                 service.submit {
                     try {
@@ -55,7 +55,7 @@ class WorkScheduler<T>(private val finder: WorkFinder<T>, private val workers: M
 
                         finder.markCompleted(it)
 
-                        logger.info("completed work.")
+                        logger.debug("completed work.")
 
                     } catch (e: Throwable) {
                         logger.error("unable to complete work", e)

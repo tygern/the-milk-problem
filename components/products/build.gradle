@@ -2,4 +2,5 @@ version "1.0-SNAPSHOT"
 
 dependencies {
     compile project(":components:database-support")
+    compile project(":components:workflow-support")
 }

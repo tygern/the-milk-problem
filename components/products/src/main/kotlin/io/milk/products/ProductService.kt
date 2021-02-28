@@ -10,15 +10,10 @@ class ProductService(val dataGateway: ProductDataGateway) {
         return ProductInfo(record.id, record.name, record.quantity)
     }
 
-    fun incrementBy(product: ProductInfo, quantity: Int) {
+    fun update(product: ProductInfo) : ProductInfo {
         val record = dataGateway.findBy(product.id)
-        record.quantity += quantity
+        record.quantity = product.quantity
         dataGateway.update(record)
-    }
-
-    fun decrementBy(product: ProductInfo, quantity: Int) {
-        val record = dataGateway.findBy(product.id)
-        record.quantity -= quantity
-        dataGateway.update(record)
+        return findBy(record.id)
     }
 }

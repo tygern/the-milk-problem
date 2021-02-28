@@ -53,9 +53,6 @@ class ProductDataGatewayTest {
         val gateway = ProductDataGateway()
         val product = gateway.findBy(101)
 
-        product.quantity = 47
-        gateway.update(product)
-
         product.quantity = 44
         gateway.update(product)
 
