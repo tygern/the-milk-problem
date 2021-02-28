@@ -68,7 +68,7 @@ export PORT=8881
 
 ## Development
 
-### Milk
+### Database
 
 ```bash
 psql -c "create database milk_development;"
@@ -78,7 +78,7 @@ psql -c "create database milk_development;"
 flyway -user=milk -password=milk -url="jdbc:postgresql://localhost:5432/milk_development" -locations=filesystem:databases/milk clean migrate
 ```
 
-### Data
+### Initial data
 
 Load a product scenario
 ```bash
