@@ -1,0 +1,21 @@
+version '1.0-SNAPSHOT'
+
+apply plugin: 'application'
+
+mainClassName = "io.milk.start.AppKt"
+
+dependencies {
+    compile project(":components:products")
+    compile project(":components:database-support")
+
+    compile "io.ktor:ktor-freemarker:$ktor_version"
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "io.milk.start.AppKt"
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

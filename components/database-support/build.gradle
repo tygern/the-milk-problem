@@ -1,0 +1,6 @@
+version "1.0-SNAPSHOT"
+
+dependencies {
+    compile 'org.jetbrains.exposed:exposed:0.17.7'
+    compile 'org.postgresql:postgresql:42.2.10'
+}
