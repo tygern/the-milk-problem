@@ -15,7 +15,7 @@ class AppTest {
     fun before() = TestScenarioSupport().loadTestScenario("products")
 
     @Test
-    fun testEmptyHome() = testApp {
+    fun testIndex() = testApp {
         handleRequest(HttpMethod.Get, "/").apply {
             assertEquals(200, response.status()?.value)
             assertTrue(response.content!!.contains("milk"))

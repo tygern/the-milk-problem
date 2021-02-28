@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 
-class ProductsDataGateway {
+class ProductDataGateway {
 
     fun create(name: String, quantity: Int): ProductRecord {
         return transaction {
@@ -46,12 +46,13 @@ class ProductsDataGateway {
         }
     }
 
-    fun update(product: ProductRecord) {
+    fun update(product: ProductRecord): ProductRecord {
         return transaction {
             ProductTable.update({ ProductTable.id eq product.id }) {
                 it[name] = product.name
                 it[quantity] = product.quantity
             }
+            return@transaction findBy(product.id)
         }
     }
 }

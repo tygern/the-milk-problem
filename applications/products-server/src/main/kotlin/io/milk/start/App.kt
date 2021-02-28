@@ -10,12 +10,13 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.jetty.*
 import io.milk.database.setupDatabase
-import io.milk.products.ProductsDataGateway
+import io.milk.products.ProductDataGateway
+import io.milk.products.ProductService
 import java.util.*
 
 fun Application.module() {
     setupDatabase()
-    val productDataGateway = ProductsDataGateway()
+    val productService = ProductService(ProductDataGateway())
 
     install(DefaultHeaders)
     install(CallLogging)
@@ -24,7 +25,7 @@ fun Application.module() {
     }
     install(Routing) {
         get("/") {
-            val products = productDataGateway.findAll()
+            val products = productService.findAll()
             call.respond(FreeMarkerContent("index.ftl", mapOf("products" to products)))
         }
         static("images") { resources("images") }
