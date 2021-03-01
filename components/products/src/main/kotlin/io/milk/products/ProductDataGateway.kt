@@ -1,8 +1,8 @@
 package io.milk.products
 
-import io.milk.database.JdbcTemplate
+import io.milk.database.DatabaseTemplate
 
-class ProductDataGateway(private val template: JdbcTemplate) {
+class ProductDataGateway(private val template: DatabaseTemplate) {
 
     fun create(name: String, quantity: Int): ProductRecord {
         return template.create(
@@ -19,7 +19,7 @@ class ProductDataGateway(private val template: JdbcTemplate) {
     }
 
     fun findBy(id: Long): ProductRecord? {
-        return template.findObject(
+        return template.findBy(
             "select id, name, quantity from products where id = ?", { rs ->
                 ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
             }, id

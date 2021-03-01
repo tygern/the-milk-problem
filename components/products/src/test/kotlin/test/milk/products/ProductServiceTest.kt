@@ -1,7 +1,7 @@
 package test.milk.products
 
 import io.milk.database.DatabaseSupport
-import io.milk.database.JdbcTemplate
+import io.milk.database.DatabaseTemplate
 import io.milk.products.ProductDataGateway
 import io.milk.products.ProductService
 import org.junit.Before
@@ -10,11 +10,11 @@ import kotlin.test.assertEquals
 
 class ProductServiceTest {
     private val dataSource = DatabaseSupport().setupDatabase()
-    private val template = JdbcTemplate(dataSource)
+    private val template = DatabaseTemplate(dataSource)
 
     @Before
     fun before() {
-        JdbcTemplate(dataSource).apply {
+        DatabaseTemplate(dataSource).apply {
             execute("delete from products")
             execute("insert into products(id, name, quantity) values (101, 'milk', 42)")
             execute("insert into products(id, name, quantity) values (102, 'kombucha', 15)")

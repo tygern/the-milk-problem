@@ -10,7 +10,7 @@ import java.time.LocalDate
 import java.util.*
 import javax.sql.DataSource
 
-class JdbcTemplate(val dataSource: DataSource) {
+class DatabaseTemplate(val dataSource: DataSource) {
 
     fun <T> create(sql: String, id: (Long) -> T, vararg params: Any) =
         dataSource.connection.use { connection ->
@@ -19,19 +19,7 @@ class JdbcTemplate(val dataSource: DataSource) {
 
     fun <T> create(connection: Connection, sql: String, id: (Long) -> T, vararg params: Any): T {
         return connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS).use { statement ->
-            for (i in params.indices) {
-                val param = params[i]
-                val parameterIndex = i + 1
-
-                when (param) {
-                    is String -> statement.setString(parameterIndex, param)
-                    is Int -> statement.setInt(parameterIndex, param)
-                    is Long -> statement.setLong(parameterIndex, param)
-                    is Boolean -> statement.setBoolean(parameterIndex, param)
-                    is LocalDate -> statement.setDate(parameterIndex, Date.valueOf(param))
-
-                }
-            }
+            setParameters(params, statement)
             statement.executeUpdate()
             val keys = statement.generatedKeys
             keys.next()
@@ -39,7 +27,9 @@ class JdbcTemplate(val dataSource: DataSource) {
         }
     }
 
-    fun <T> findObject(sql: String, mapper: (ResultSet) -> T, id: Long): T? {
+    fun <T> findAll(sql: String, mapper: (ResultSet) -> T) = query(sql, {}, mapper)
+
+    fun <T> findBy(sql: String, mapper: (ResultSet) -> T, id: Long): T? {
         val list = query(sql, { ps -> ps.setLong(1, id) }, mapper)
         when {
             list.isEmpty() -> return null
@@ -47,10 +37,6 @@ class JdbcTemplate(val dataSource: DataSource) {
             else -> return list.first()
         }
     }
-
-    fun <T> findAll(sql: String, mapper: (ResultSet) -> T) = query(sql, {}, mapper)
-
-    fun <T> findBy(sql: String, mapper: (ResultSet) -> T, id: Long) = query(sql, { ps -> ps.setLong(1, id) }, mapper)
 
     fun update(sql: String, vararg params: Any) {
         dataSource.connection.use { connection ->
@@ -60,22 +46,27 @@ class JdbcTemplate(val dataSource: DataSource) {
 
     fun update(connection: Connection, sql: String, vararg params: Any) {
         return connection.prepareStatement(sql).use { statement ->
-            for (i in params.indices) {
-                val param = params[i]
-                val parameterIndex = i + 1
-
-                when (param) {
-                    is String -> statement.setString(parameterIndex, param)
-                    is Int -> statement.setInt(parameterIndex, param)
-                    is Long -> statement.setLong(parameterIndex, param)
-                    is Boolean -> statement.setBoolean(parameterIndex, param)
-                    is LocalDate -> statement.setDate(parameterIndex, Date.valueOf(param))
-
-                }
-            }
+            setParameters(params, statement)
             statement.executeUpdate()
         }
     }
+
+    private fun setParameters(params: Array<out Any>, statement: PreparedStatement) {
+        for (i in params.indices) {
+            val param = params[i]
+            val parameterIndex = i + 1
+
+            when (param) {
+                is String -> statement.setString(parameterIndex, param)
+                is Int -> statement.setInt(parameterIndex, param)
+                is Long -> statement.setLong(parameterIndex, param)
+                is Boolean -> statement.setBoolean(parameterIndex, param)
+                is LocalDate -> statement.setDate(parameterIndex, Date.valueOf(param))
+
+            }
+        }
+    }
+
     /// USED FOR TESTING
 
     fun execute(sql: String) {

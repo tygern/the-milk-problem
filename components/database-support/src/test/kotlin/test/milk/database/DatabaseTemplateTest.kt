@@ -1,14 +1,14 @@
 package test.milk.database
 
 import io.milk.database.DatabaseSupport
-import io.milk.database.JdbcTemplate
+import io.milk.database.DatabaseTemplate
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class JdbcTemplateTest() {
+class DatabaseTemplateTest() {
     private val dataSource = DatabaseSupport().setupDatabase()
-    private val template = JdbcTemplate(dataSource)
+    private val template = DatabaseTemplate(dataSource)
 
     @Test
     fun testFind() {
@@ -23,10 +23,10 @@ class JdbcTemplateTest() {
     fun testFindObject() {
         val sql = "select id, name from (select 42 as id, 'apples' as name) as dates where id = ?"
 
-        var actual = template.findObject(sql, { ps -> ps.getInt(1) }, 42)
+        var actual = template.findBy(sql, { ps -> ps.getInt(1) }, 42)
         assertEquals(42, actual)
 
-        actual = template.findObject(sql, { ps -> ps.getInt(1) }, 44)
+        actual = template.findBy(sql, { ps -> ps.getInt(1) }, 44)
         assertNull(actual)
     }
 }
