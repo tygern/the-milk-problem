@@ -17,9 +17,9 @@ class ProductDataGatewayTest {
     fun before() {
         DatabaseTemplate(dataSource).apply {
             execute("delete from products")
-            execute("insert into products(id, name, quantity) values (101, 'milk', 42)")
-            execute("insert into products(id, name, quantity) values (102, 'bacon', 52)")
-            execute("insert into products(id, name, quantity) values (103, 'tuna', 62)")
+            execute("insert into products(id, name, quantity) values (101000, 'milk', 42)")
+            execute("insert into products(id, name, quantity) values (102000, 'bacon', 52)")
+            execute("insert into products(id, name, quantity) values (103000, 'tuna', 62)")
         }
     }
 
@@ -42,7 +42,7 @@ class ProductDataGatewayTest {
     @Test
     fun findBy() {
         val gateway = ProductDataGateway(dataSource)
-        val product = gateway.findBy(101)!!
+        val product = gateway.findBy(101000)!!
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
     }
@@ -50,12 +50,12 @@ class ProductDataGatewayTest {
     @Test
     fun update() {
         val gateway = ProductDataGateway(dataSource)
-        val product = gateway.findBy(101)!!
+        val product = gateway.findBy(101000)!!
 
         product.quantity = 44
         gateway.update(product)
 
-        val updated = gateway.findBy(101)!!
+        val updated = gateway.findBy(101000)!!
         assertEquals("milk", updated.name)
         assertEquals(44, updated.quantity)
     }
@@ -63,7 +63,7 @@ class ProductDataGatewayTest {
     @Test
     fun decrementBy() {
         val gateway = ProductDataGateway(dataSource)
-        val product = gateway.decrementBy(PurchaseInfo(101, "milk", 2))!!
+        val product = gateway.decrementBy(PurchaseInfo(101000, "milk", 2))!!
         assertEquals("milk", product.name)
         assertEquals(40, product.quantity)
     }
@@ -71,7 +71,7 @@ class ProductDataGatewayTest {
     @Test
     fun fasterDecrementBy() {
         val gateway = ProductDataGateway(dataSource)
-        val product = gateway.fasterDecrementBy(PurchaseInfo(101, "milk", 2))!!
+        val product = gateway.fasterDecrementBy(PurchaseInfo(101000, "milk", 2))!!
         assertEquals("milk", product.name)
         assertEquals(40, product.quantity)
     }

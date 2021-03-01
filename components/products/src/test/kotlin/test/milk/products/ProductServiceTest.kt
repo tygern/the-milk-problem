@@ -16,8 +16,8 @@ class ProductServiceTest {
     fun before() {
         DatabaseTemplate(dataSource).apply {
             execute("delete from products")
-            execute("insert into products(id, name, quantity) values (101, 'milk', 42)")
-            execute("insert into products(id, name, quantity) values (102, 'kombucha', 15)")
+            execute("insert into products(id, name, quantity) values (101000, 'milk', 42)")
+            execute("insert into products(id, name, quantity) values (102000, 'kombucha', 15)")
         }
     }
 
@@ -31,7 +31,7 @@ class ProductServiceTest {
     @Test
     fun findBy() {
         val service = ProductService(ProductDataGateway(dataSource))
-        val product = service.findBy(101)
+        val product = service.findBy(101000)
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
     }
@@ -39,9 +39,9 @@ class ProductServiceTest {
     @Test
     fun update() {
         val service = ProductService(ProductDataGateway(dataSource))
-        service.update(PurchaseInfo(101, "milk", 2))
+        service.update(PurchaseInfo(101000, "milk", 2))
 
-        val product = service.findBy(101)
+        val product = service.findBy(101000)
         assertEquals("milk", product.name)
         assertEquals(40, product.quantity)
     }
@@ -50,7 +50,7 @@ class ProductServiceTest {
     fun decrementBy() {
         val service = ProductService(ProductDataGateway(dataSource))
 
-        val product = service.decrementBy(PurchaseInfo(101, "milk", 2))
+        val product = service.decrementBy(PurchaseInfo(101000, "milk", 2))
         assertEquals("milk", product.name)
         assertEquals(40, product.quantity)
     }

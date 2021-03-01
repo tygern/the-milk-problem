@@ -53,7 +53,7 @@ class AppTest {
             (1..3).map {
                 launch(context = Dispatchers.Default) {
                     with(engine) {
-                        with(handleRequest(HttpMethod.Post, "/api/v2/products") {
+                        with(handleRequest(HttpMethod.Post, "/api/v1/products") {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                             setBody(mapper.writeValueAsString(PurchaseInfo(42, "milk", 1)))
                         }) {
