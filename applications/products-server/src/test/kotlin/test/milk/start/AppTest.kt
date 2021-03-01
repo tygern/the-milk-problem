@@ -15,6 +15,7 @@ import org.junit.Ignore
 import org.junit.Test
 import test.milk.TestScenarioSupport
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 
@@ -48,12 +49,35 @@ class AppTest {
     }
 
     @Ignore
-    fun testPurchase() {
+    fun testIncorrectQuantity() {
+        makePurchases("/api/v1/products")
+
+        with(engine) {
+            with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
+                assertFalse(response.content!!.contains("27"))
+            }
+        }
+    }
+
+    @Ignore
+    fun testCorrectQuantity() {
+        makePurchases("/api/v2/products")
+
+        with(engine) {
+            with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
+                assertTrue(response.content!!.contains("27"))
+            }
+        }
+    }
+
+    ///
+
+    private fun makePurchases(uri: String) {
         runBlocking {
-            (1..3).map {
+            (1..4).map {
                 launch(context = Dispatchers.Default) {
                     with(engine) {
-                        with(handleRequest(HttpMethod.Post, "/api/v1/products") {
+                        with(handleRequest(HttpMethod.Post, uri) {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                             setBody(mapper.writeValueAsString(PurchaseInfo(42, "milk", 1)))
                         }) {
@@ -61,12 +85,6 @@ class AppTest {
                         }
                     }
                 }
-            }
-        }
-
-        with(engine) {
-            with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
-                assertTrue(response.content!!.contains("28"))
             }
         }
     }
