@@ -31,7 +31,7 @@ class AppTest {
         engine.application.module()
     }
 
-//    @Test
+    @Test
     fun testIndex() {
         with(engine) {
             with(handleRequest(HttpMethod.Get, "/")) {
