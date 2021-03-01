@@ -1,37 +1,36 @@
 package test.milk.products
 
-import io.milk.database.setupDatabase
+import io.milk.database.DatabaseSupport
+import io.milk.database.JdbcTemplate
 import io.milk.products.ProductDataGateway
 import io.milk.products.ProductService
-import io.milk.products.ProductTable
-import org.jetbrains.exposed.sql.deleteAll
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class ProductServiceTest {
+    private val dataSource = DatabaseSupport().setupDatabase()
+    private val template = JdbcTemplate(dataSource)
+
     @Before
     fun before() {
-        setupDatabase()
-
-        transaction {
-            ProductTable.deleteAll()
-            stockInventory()
+        JdbcTemplate(dataSource).apply {
+            execute("delete from products")
+            execute("insert into products(id, name, quantity) values (101, 'milk', 42)")
+            execute("insert into products(id, name, quantity) values (102, 'kombucha', 15)")
         }
     }
 
     @Test
     fun findAll() {
-        val service = ProductService(ProductDataGateway())
+        val service = ProductService(ProductDataGateway(template))
         val products = service.findAll()
         assertEquals(2, products.size)
     }
 
     @Test
     fun findBy() {
-        val service = ProductService(ProductDataGateway())
+        val service = ProductService(ProductDataGateway(template))
         val product = service.findBy(101)
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
@@ -39,7 +38,7 @@ class ProductServiceTest {
 
     @Test
     fun update() {
-        val service = ProductService(ProductDataGateway())
+        val service = ProductService(ProductDataGateway(template))
         val info = service.findBy(101)
         info.quantity += 2
         service.update(info)
@@ -47,23 +46,5 @@ class ProductServiceTest {
         val product = service.findBy(101)
         assertEquals("milk", product.name)
         assertEquals(44, product.quantity)
-    }
-
-    ///
-
-    private fun stockInventory() {
-        transaction {
-            ProductTable.insert {
-                it[id] = 101
-                it[name] = "milk"
-                it[quantity] = 42
-            } get ProductTable.id
-
-            ProductTable.insert {
-                it[id] = 102
-                it[name] = "kombucha"
-                it[quantity] = 15
-            } get ProductTable.id
-        }
     }
 }

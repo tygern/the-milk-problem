@@ -9,7 +9,7 @@ class PurchaseGenerator : WorkFinder<PurchaseTask> {
     override fun findRequested(name: String): List<PurchaseTask> {
         logger.info("someone purchased some milk!")
 
-        return mutableListOf(PurchaseTask(101, "milk", (1..4).random()))
+        return mutableListOf(PurchaseTask(42, "milk", (1..4).random()))
     }
 
     override fun markCompleted(info: PurchaseTask) {

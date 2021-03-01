@@ -1,58 +1,36 @@
 package io.milk.products
 
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
+import io.milk.database.JdbcTemplate
 
-class ProductDataGateway {
+class ProductDataGateway(private val template: JdbcTemplate) {
 
     fun create(name: String, quantity: Int): ProductRecord {
-        return transaction {
-            val id = ProductTable.insert {
-                it[ProductTable.name] = name
-                it[ProductTable.quantity] = quantity
-            } get ProductTable.id
-            return@transaction ProductRecord(id, name, quantity)
-        }
+        return template.create(
+            "insert into products (name, quantity) values (?, ?)", { id ->
+                ProductRecord(id, name, quantity)
+            }, name, quantity
+        )
     }
 
     fun findAll(): List<ProductRecord> {
-        val products = mutableListOf<ProductRecord>()
-        transaction {
-            for (result in ProductTable.selectAll()) {
-                products.add(
-                    ProductRecord(
-                        id = result[ProductTable.id],
-                        name = result[ProductTable.name],
-                        quantity = result[ProductTable.quantity]
-                    )
-                )
-            }
+        return template.findAll("select id, name, quantity from products") { rs ->
+            ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
         }
-        return products
     }
 
-    fun findBy(id: Long): ProductRecord {
-        return transaction {
-            val result = ProductTable.select { ProductTable.id eq id }.single()
-
-            return@transaction ProductRecord(
-                id = result[ProductTable.id],
-                name = result[ProductTable.name],
-                quantity = result[ProductTable.quantity]
-            )
-        }
+    fun findBy(id: Long): ProductRecord? {
+        return template.findObject(
+            "select id, name, quantity from products where id = ?", { rs ->
+                ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
+            }, id
+        )
     }
 
     fun update(product: ProductRecord): ProductRecord {
-        return transaction {
-            ProductTable.update({ ProductTable.id eq product.id }) {
-                it[name] = product.name
-                it[quantity] = product.quantity
-            }
-            return@transaction findBy(product.id)
-        }
+        template.update(
+            "update products set name = ?, quantity = ? where id = ?",
+            product.name, product.quantity, product.id
+        )
+        return product
     }
 }

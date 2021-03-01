@@ -1,11 +1,13 @@
 package io.milk.database
 
-import org.jetbrains.exposed.sql.Database
-import org.postgresql.Driver
+import com.zaxxer.hikari.HikariDataSource
 
-fun setupDatabase() {
-    Database.connect(System.getenv("JDBC_DATABASE_URL"),
-            Driver::class.java.name,
-            System.getenv("JDBC_DATABASE_USERNAME"),
-            System.getenv("JDBC_DATABASE_PASSWORD"))
+open class DatabaseSupport {
+    fun setupDatabase(): HikariDataSource {
+        val dataSource = HikariDataSource()
+        dataSource.jdbcUrl = System.getenv("JDBC_DATABASE_URL")
+        dataSource.username = System.getenv("JDBC_DATABASE_USERNAME")
+        dataSource.password = System.getenv("JDBC_DATABASE_USERNAME")
+        return dataSource
+    }
 }

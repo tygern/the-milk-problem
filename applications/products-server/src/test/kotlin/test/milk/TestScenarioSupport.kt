@@ -1,19 +1,17 @@
 package test.milk
 
-import io.milk.database.setupDatabase
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import org.jetbrains.exposed.sql.transactions.transaction
+import io.milk.database.DatabaseSupport
+import io.milk.database.JdbcTemplate
 
 class TestScenarioSupport {
     fun loadTestScenario(name: String) {
-        setupDatabase()
+        val dataSource = DatabaseSupport().setupDatabase()
+        val template = JdbcTemplate(dataSource)
         this.javaClass.classLoader.getResourceAsStream("scenarios/" + name + ".sql").reader().readLines()
             .asSequence()
             .filterNot(String::isNullOrBlank)
             .forEach {
-                transaction {
-                    TransactionManager.current().exec(it)
-                }
+                template.execute(it)
             }
     }
 }

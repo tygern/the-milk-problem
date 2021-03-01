@@ -1,87 +1,62 @@
 package test.milk.products
 
-import io.milk.database.setupDatabase
+
+import io.milk.database.DatabaseSupport
+import io.milk.database.JdbcTemplate
 import io.milk.products.ProductDataGateway
-import io.milk.products.ProductTable
-import org.jetbrains.exposed.sql.deleteAll
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ProductDataGatewayTest {
+    private val dataSource = DatabaseSupport().setupDatabase()
+    private val template = JdbcTemplate(dataSource)
+
     @Before
     fun before() {
-        setupDatabase()
-
-        transaction {
-            ProductTable.deleteAll()
-            stockInventory()
+        JdbcTemplate(dataSource).apply {
+            execute("delete from products")
+            execute("insert into products(id, name, quantity) values (101, 'milk', 42)")
+            execute("insert into products(id, name, quantity) values (102, 'bacon', 52)")
+            execute("insert into products(id, name, quantity) values (103, 'tuna', 62)")
         }
     }
 
     @Test
     fun create() {
-        transaction {
-            val gateway = ProductDataGateway()
-            val product = gateway.create("eggs", 10)
-            assertTrue(product.id > 0)
-            assertEquals("eggs", product.name)
-            assertEquals(10, product.quantity)
-        }
+        val gateway = ProductDataGateway(template)
+        val product = gateway.create("eggs", 10)
+        assertTrue(product.id > 0)
+        assertEquals("eggs", product.name)
+        assertEquals(10, product.quantity)
     }
 
     @Test
     fun selectAll() {
-        val gateway = ProductDataGateway()
+        val gateway = ProductDataGateway(template)
         val products = gateway.findAll()
         assertEquals(3, products.size)
     }
 
     @Test
     fun findBy() {
-        val gateway = ProductDataGateway()
-        val product = gateway.findBy(101)
+        val gateway = ProductDataGateway(template)
+        val product = gateway.findBy(101)!!
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
     }
 
     @Test
     fun update() {
-        val gateway = ProductDataGateway()
-        val product = gateway.findBy(101)
+        val gateway = ProductDataGateway(template)
+        val product = gateway.findBy(101)!!
 
         product.quantity = 44
         gateway.update(product)
 
-        val updated = gateway.findBy(101)
+        val updated = gateway.findBy(101)!!
         assertEquals("milk", updated.name)
         assertEquals(44, updated.quantity)
-    }
-
-    ///
-
-    private fun stockInventory() {
-        transaction {
-            ProductTable.insert {
-                it[id] = 101
-                it[name] = "milk"
-                it[quantity] = 42
-            } get ProductTable.id
-
-            ProductTable.insert {
-                it[id] = 102
-                it[name] = "bacon"
-                it[quantity] = 52
-            } get ProductTable.id
-
-            ProductTable.insert {
-                it[id] = 103
-                it[name] = "tuna"
-                it[quantity] = 62
-            } get ProductTable.id
-        }
     }
 }

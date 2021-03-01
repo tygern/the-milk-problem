@@ -11,14 +11,20 @@ import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.jetty.*
-import io.milk.database.setupDatabase
+import io.milk.database.DatabaseSupport
+import io.milk.database.JdbcTemplate
+
 import io.milk.products.ProductDataGateway
 import io.milk.products.ProductService
+import org.slf4j.LoggerFactory
 import java.util.*
 
 fun Application.module() {
-    setupDatabase()
-    val productService = ProductService(ProductDataGateway())
+    val logger = LoggerFactory.getLogger(this.javaClass)
+
+    val dataSource = DatabaseSupport().setupDatabase()
+    val template = JdbcTemplate(dataSource)
+    val productService = ProductService(ProductDataGateway(template))
 
     install(DefaultHeaders)
     install(CallLogging)
@@ -35,9 +41,16 @@ fun Application.module() {
         }
         post("/api/products") {
             val purchase = call.receive<PurchaseInfo>()
+
+            logger.info("received purchase {} {}", purchase.name, purchase.amount)
+
             val product = productService.findBy(purchase.id)
+            logger.info("found product {} {}", product.name, product.quantity)
+
             product.decrementBy(purchase.amount)
             val updated = productService.update(product)
+            logger.info("updated product {} {}", updated.name, updated.quantity)
+
             call.respond(updated)
         }
         static("images") { resources("images") }
