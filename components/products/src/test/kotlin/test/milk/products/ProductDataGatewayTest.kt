@@ -4,6 +4,7 @@ package test.milk.products
 import io.milk.database.DatabaseSupport
 import io.milk.database.DatabaseTemplate
 import io.milk.products.ProductDataGateway
+import io.milk.products.PurchaseInfo
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -11,7 +12,6 @@ import kotlin.test.assertTrue
 
 class ProductDataGatewayTest {
     private val dataSource = DatabaseSupport().setupDatabase()
-    private val template = DatabaseTemplate(dataSource)
 
     @Before
     fun before() {
@@ -25,7 +25,7 @@ class ProductDataGatewayTest {
 
     @Test
     fun create() {
-        val gateway = ProductDataGateway(template)
+        val gateway = ProductDataGateway(dataSource)
         val product = gateway.create("eggs", 10)
         assertTrue(product.id > 0)
         assertEquals("eggs", product.name)
@@ -34,14 +34,14 @@ class ProductDataGatewayTest {
 
     @Test
     fun selectAll() {
-        val gateway = ProductDataGateway(template)
+        val gateway = ProductDataGateway(dataSource)
         val products = gateway.findAll()
         assertEquals(3, products.size)
     }
 
     @Test
     fun findBy() {
-        val gateway = ProductDataGateway(template)
+        val gateway = ProductDataGateway(dataSource)
         val product = gateway.findBy(101)!!
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
@@ -49,7 +49,7 @@ class ProductDataGatewayTest {
 
     @Test
     fun update() {
-        val gateway = ProductDataGateway(template)
+        val gateway = ProductDataGateway(dataSource)
         val product = gateway.findBy(101)!!
 
         product.quantity = 44
@@ -58,5 +58,21 @@ class ProductDataGatewayTest {
         val updated = gateway.findBy(101)!!
         assertEquals("milk", updated.name)
         assertEquals(44, updated.quantity)
+    }
+
+    @Test
+    fun decrementBy() {
+        val gateway = ProductDataGateway(dataSource)
+        val product = gateway.decrementBy(PurchaseInfo(101, "milk", 2))!!
+        assertEquals("milk", product.name)
+        assertEquals(40, product.quantity)
+    }
+
+    @Test
+    fun fasterDecrementBy() {
+        val gateway = ProductDataGateway(dataSource)
+        val product = gateway.fasterDecrementBy(PurchaseInfo(101, "milk", 2))!!
+        assertEquals("milk", product.name)
+        assertEquals(40, product.quantity)
     }
 }

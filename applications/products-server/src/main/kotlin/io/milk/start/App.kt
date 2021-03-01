@@ -12,10 +12,9 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.jetty.*
 import io.milk.database.DatabaseSupport
-import io.milk.database.DatabaseTemplate
-
 import io.milk.products.ProductDataGateway
 import io.milk.products.ProductService
+import io.milk.products.PurchaseInfo
 import org.slf4j.LoggerFactory
 import java.util.*
 
@@ -23,8 +22,7 @@ fun Application.module() {
     val logger = LoggerFactory.getLogger(this.javaClass)
 
     val dataSource = DatabaseSupport().setupDatabase()
-    val template = DatabaseTemplate(dataSource)
-    val productService = ProductService(ProductDataGateway(template))
+    val productService = ProductService(ProductDataGateway(dataSource))
 
     install(DefaultHeaders)
     install(CallLogging)
@@ -39,20 +37,27 @@ fun Application.module() {
             val products = productService.findAll()
             call.respond(FreeMarkerContent("index.ftl", mapOf("products" to products)))
         }
-        post("/api/products") {
+        post("/api/v1/products") {
             val purchase = call.receive<PurchaseInfo>()
             logger.info("received purchase {} {}", purchase.name, purchase.amount)
 
-            val product = productService.findBy(purchase.id)
-            logger.info("found product {} {}", product.name, product.quantity)
+            val updated = productService.update(purchase)
 
-            product.decrementBy(purchase.amount)
-
-            val updated = productService.update(product)
             logger.info("updated product {} {}", updated.name, updated.quantity)
 
             call.respond(updated)
         }
+        post("/api/v2/products") {
+            val purchase = call.receive<PurchaseInfo>()
+            logger.info("received purchase {} {}", purchase.name, purchase.amount)
+
+            val updated = productService.decrementBy(purchase)
+
+            logger.info("updated product {} {}", updated.name, updated.quantity)
+
+            call.respond(updated)
+        }
+
         static("images") { resources("images") }
         static("style") { resources("style") }
     }

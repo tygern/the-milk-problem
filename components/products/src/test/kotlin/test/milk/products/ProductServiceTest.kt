@@ -4,13 +4,13 @@ import io.milk.database.DatabaseSupport
 import io.milk.database.DatabaseTemplate
 import io.milk.products.ProductDataGateway
 import io.milk.products.ProductService
+import io.milk.products.PurchaseInfo
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
 
 class ProductServiceTest {
     private val dataSource = DatabaseSupport().setupDatabase()
-    private val template = DatabaseTemplate(dataSource)
 
     @Before
     fun before() {
@@ -23,14 +23,14 @@ class ProductServiceTest {
 
     @Test
     fun findAll() {
-        val service = ProductService(ProductDataGateway(template))
+        val service = ProductService(ProductDataGateway(dataSource))
         val products = service.findAll()
         assertEquals(2, products.size)
     }
 
     @Test
     fun findBy() {
-        val service = ProductService(ProductDataGateway(template))
+        val service = ProductService(ProductDataGateway(dataSource))
         val product = service.findBy(101)
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
@@ -38,13 +38,20 @@ class ProductServiceTest {
 
     @Test
     fun update() {
-        val service = ProductService(ProductDataGateway(template))
-        val info = service.findBy(101)
-        info.quantity += 2
-        service.update(info)
+        val service = ProductService(ProductDataGateway(dataSource))
+        service.update(PurchaseInfo(101, "milk", 2))
 
         val product = service.findBy(101)
         assertEquals("milk", product.name)
-        assertEquals(44, product.quantity)
+        assertEquals(40, product.quantity)
+    }
+
+    @Test
+    fun decrementBy() {
+        val service = ProductService(ProductDataGateway(dataSource))
+
+        val product = service.decrementBy(PurchaseInfo(101, "milk", 2))
+        assertEquals("milk", product.name)
+        assertEquals(40, product.quantity)
     }
 }

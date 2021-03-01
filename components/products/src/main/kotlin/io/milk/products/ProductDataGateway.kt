@@ -1,8 +1,11 @@
 package io.milk.products
 
 import io.milk.database.DatabaseTemplate
+import io.milk.database.TransactionManager
+import javax.sql.DataSource
 
-class ProductDataGateway(private val template: DatabaseTemplate) {
+class ProductDataGateway(private val dataSource: DataSource) {
+    private val template = DatabaseTemplate(dataSource)
 
     fun create(name: String, quantity: Int): ProductRecord {
         return template.create(
@@ -32,5 +35,41 @@ class ProductDataGateway(private val template: DatabaseTemplate) {
             product.name, product.quantity, product.id
         )
         return product
+    }
+
+    fun decrementBy(purchase: PurchaseInfo): ProductRecord? {
+        return TransactionManager(dataSource).withTransaction {
+            val found = template.findBy(
+                it,
+                "select id, name, quantity from products where id = ? for update", { rs ->
+                    ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
+                }, purchase.id
+            )
+            template.update(
+                it,
+                "update products set quantity = ? where id = ?",
+                (found!!.quantity - purchase.amount), purchase.id
+            )
+            template.findBy(
+                it,
+                "select id, name, quantity from products where id = ?", { rs ->
+                    ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
+                }, purchase.id
+            )
+        }
+    }
+
+    fun fasterDecrementBy(purchase: PurchaseInfo): ProductRecord? {
+        return TransactionManager(dataSource).withTransaction {
+            template.update(it,
+                "update products set quantity = (quantity - ?) where id = ?",
+                purchase.amount, purchase.id
+            )
+            template.findBy(it,
+                "select id, name, quantity from products where id = ?", { rs ->
+                    ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
+                }, purchase.id
+            )
+        }
     }
 }

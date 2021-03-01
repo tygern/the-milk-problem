@@ -27,10 +27,22 @@ class DatabaseTemplate(val dataSource: DataSource) {
         }
     }
 
-    fun <T> findAll(sql: String, mapper: (ResultSet) -> T) = query(sql, {}, mapper)
+    fun <T> findAll(sql: String, mapper: (ResultSet) -> T): List<T> {
+        return query(sql, {}, mapper)
+    }
+
+    fun <T> findAll(connection: Connection, sql: String, mapper: (ResultSet) -> T): List<T> {
+        return query(connection, sql, {}, mapper)
+    }
 
     fun <T> findBy(sql: String, mapper: (ResultSet) -> T, id: Long): T? {
-        val list = query(sql, { ps -> ps.setLong(1, id) }, mapper)
+        dataSource.connection.use { connection ->
+            return findBy(connection, sql, mapper, id)
+        }
+    }
+
+    fun <T> findBy(connection: Connection, sql: String, mapper: (ResultSet) -> T, id: Long): T? {
+        val list = query(connection, sql, { ps -> ps.setLong(1, id) }, mapper)
         when {
             list.isEmpty() -> return null
 
@@ -49,6 +61,30 @@ class DatabaseTemplate(val dataSource: DataSource) {
             setParameters(params, statement)
             statement.executeUpdate()
         }
+    }
+
+    fun <T> query(sql: String, params: (PreparedStatement) -> Unit, mapper: (ResultSet) -> T): List<T> {
+        dataSource.connection.use { connection ->
+            return query(connection, sql, params, mapper)
+        }
+    }
+
+    fun <T> query(
+        connection: Connection,
+        sql: String,
+        params: (PreparedStatement) -> Unit,
+        mapper: (ResultSet) -> T
+    ): List<T> {
+        val results = ArrayList<T>()
+        connection.prepareStatement(sql).use { statement ->
+            params(statement)
+            statement.executeQuery().use { rs ->
+                while (rs.next()) {
+                    results.add(mapper(rs))
+                }
+            }
+        }
+        return results
     }
 
     private fun setParameters(params: Array<out Any>, statement: PreparedStatement) {
@@ -73,21 +109,5 @@ class DatabaseTemplate(val dataSource: DataSource) {
         dataSource.connection.use { connection ->
             connection.prepareCall(sql).use(CallableStatement::execute)
         }
-    }
-
-    fun <T> query(sql: String, params: (PreparedStatement) -> Unit, mapper: (ResultSet) -> T): List<T> {
-        val results = ArrayList<T>()
-
-        dataSource.connection.use { connection ->
-            connection.prepareStatement(sql).use { statement ->
-                params(statement)
-                statement.executeQuery().use { rs ->
-                    while (rs.next()) {
-                        results.add(mapper(rs))
-                    }
-                }
-            }
-        }
-        return results
     }
 }

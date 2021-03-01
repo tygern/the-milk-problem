@@ -4,10 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import io.milk.products.ProductInfo
-import io.milk.start.PurchaseInfo
+import io.milk.products.PurchaseInfo
 import io.milk.start.module
 import io.mockk.clearAllMocks
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import test.milk.TestScenarioSupport
@@ -46,14 +50,25 @@ class AppTest {
 
     @Test
     fun testPurchase() {
+        runBlocking {
+            val jobs: List<Job> = (1..3).map {
+                launch(context = Dispatchers.Default) {
+                    with(engine) {
+                        with(handleRequest(HttpMethod.Post, "/api/v2/products") {
+                            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                            setBody(mapper.writeValueAsString(PurchaseInfo(42, "milk", 1)))
+                        }) {
+                            assertEquals(200, response.status()?.value)
+                        }
+                    }
+                }
+            }
+            jobs.joinAll()
+        }
+
         with(engine) {
-            with(handleRequest(HttpMethod.Post, "/api/products") {
-                addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                setBody(mapper.writeValueAsString(PurchaseInfo(42, "milk", 3)))
-            }) {
-                assertEquals(200, response.status()?.value)
-                val product = mapper.readValue(response.content, ProductInfo::class.java)
-                assertEquals(28, product.quantity)
+            with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
+                assertTrue(response.content!!.contains("28"))
             }
         }
     }
