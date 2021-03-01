@@ -8,8 +8,6 @@ import io.milk.products.PurchaseInfo
 import io.milk.start.module
 import io.mockk.clearAllMocks
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -48,10 +46,10 @@ class AppTest {
         }
     }
 
-//    @Test
+    @Test
     fun testPurchase() {
         runBlocking {
-            val jobs: List<Job> = (1..3).map {
+            (1..3).map {
                 launch(context = Dispatchers.Default) {
                     with(engine) {
                         with(handleRequest(HttpMethod.Post, "/api/v2/products") {
@@ -63,7 +61,6 @@ class AppTest {
                     }
                 }
             }
-            jobs.joinAll()
         }
 
         with(engine) {
