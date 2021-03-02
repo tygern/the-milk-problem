@@ -37,7 +37,7 @@ class ProductDataGateway(private val dataSource: DataSource) {
         return product
     }
 
-    fun decrementBy(purchase: PurchaseInfo) {
+    fun decrementBy(purchase: PurchaseInfo): ProductRecord? {
         return TransactionManager(dataSource).withTransaction {
             val found = template.findBy(
                 it,
@@ -49,6 +49,12 @@ class ProductDataGateway(private val dataSource: DataSource) {
                 it,
                 "update products set quantity = ? where id = ?",
                 (found!!.quantity - purchase.amount), purchase.id
+            )
+            template.findBy(
+                it,
+                "select id, name, quantity from products where id = ?", { rs ->
+                    ProductRecord(rs.getLong(1), rs.getString(2), rs.getInt(3))
+                }, purchase.id
             )
         }
     }

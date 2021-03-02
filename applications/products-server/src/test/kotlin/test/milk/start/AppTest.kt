@@ -3,6 +3,7 @@ package test.milk.start
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.ktor.http.*
+import io.ktor.request.*
 import io.ktor.server.testing.*
 import io.milk.products.PurchaseInfo
 import io.milk.start.module

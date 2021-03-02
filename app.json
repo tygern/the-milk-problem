@@ -1,0 +1,12 @@
+{
+  "environments": {
+    "test": {
+      "addons": [
+        "heroku-postgresql"
+      ],
+      "scripts": {
+        "test-setup": "./gradlew -Pflyway.locations=filesystem:databases/milk -Pflyway.url=\"$JDBC_DATABASE_URL\" -Pflyway.user=\"$JDBC_DATABASE_USERNAME\" -Pflyway.password=\"$JDBC_DATABASE_PASSWORD\" flywayMigrate -i"
+      }
+    }
+  }
+}

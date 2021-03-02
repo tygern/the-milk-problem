@@ -11,6 +11,7 @@ import kotlin.test.assertEquals
 
 class ProductServiceTest {
     private val dataSource = DatabaseSupport().setupDatabase()
+    private val service = ProductService(ProductDataGateway(dataSource))
 
     @Before
     fun before() {
@@ -23,22 +24,21 @@ class ProductServiceTest {
 
     @Test
     fun findAll() {
-        val service = ProductService(ProductDataGateway(dataSource))
         val products = service.findAll()
+
         assertEquals(2, products.size)
     }
 
     @Test
     fun findBy() {
-        val service = ProductService(ProductDataGateway(dataSource))
         val product = service.findBy(101000)
+
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
     }
 
     @Test
     fun update() {
-        val service = ProductService(ProductDataGateway(dataSource))
         service.update(PurchaseInfo(101000, "milk", 2))
 
         val product = service.findBy(101000)
@@ -48,6 +48,9 @@ class ProductServiceTest {
 
     @Test
     fun decrementBy() {
-        // todo - test decrementBy
+        val product = service.decrementBy(PurchaseInfo(101000, "milk", 2))
+
+        assertEquals("milk", product.name)
+        assertEquals(40, product.quantity)
     }
 }

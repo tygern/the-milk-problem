@@ -38,9 +38,9 @@ fun Application.module() {
         post("/api/v1/products") {
             val purchase = call.receive<PurchaseInfo>()
 
-            productService.update(purchase) // todo - replace with decrementBy
+            val updated = productService.decrementBy(purchase)
 
-            call.respond(HttpStatusCode.Created)
+            call.respond(HttpStatusCode.Created, updated)
         }
         static("images") { resources("images") }
         static("style") { resources("style") }

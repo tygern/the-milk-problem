@@ -7,10 +7,12 @@ import io.milk.products.PurchaseInfo
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ProductDataGatewayTest {
     private val dataSource = DatabaseSupport().setupDatabase()
+    private val gateway = ProductDataGateway(dataSource)
 
     @Before
     fun before() {
@@ -24,8 +26,8 @@ class ProductDataGatewayTest {
 
     @Test
     fun create() {
-        val gateway = ProductDataGateway(dataSource)
         val product = gateway.create("eggs", 10)
+
         assertTrue(product.id > 0)
         assertEquals("eggs", product.name)
         assertEquals(10, product.quantity)
@@ -33,22 +35,21 @@ class ProductDataGatewayTest {
 
     @Test
     fun selectAll() {
-        val gateway = ProductDataGateway(dataSource)
         val products = gateway.findAll()
+
         assertEquals(3, products.size)
     }
 
     @Test
     fun findBy() {
-        val gateway = ProductDataGateway(dataSource)
         val product = gateway.findBy(101000)!!
+
         assertEquals("milk", product.name)
         assertEquals(42, product.quantity)
     }
 
     @Test
     fun update() {
-        val gateway = ProductDataGateway(dataSource)
         val product = gateway.findBy(101000)!!
 
         product.quantity = 44
@@ -61,7 +62,6 @@ class ProductDataGatewayTest {
 
     @Test
     fun decrementBy() {
-        val gateway = ProductDataGateway(dataSource)
         gateway.decrementBy(PurchaseInfo(101000, "milk", 2))
 
         val updated = gateway.findBy(101000)!!
@@ -70,8 +70,15 @@ class ProductDataGatewayTest {
     }
 
     @Test
+    fun decrementByReturn() {
+        val updated = gateway.decrementBy(PurchaseInfo(101000, "milk", 2))!!
+
+        assertEquals("milk", updated.name)
+        assertEquals(40, updated.quantity)
+    }
+
+    @Test
     fun fasterDecrementBy() {
-        val gateway = ProductDataGateway(dataSource)
         gateway.fasterDecrementBy(PurchaseInfo(101000, "milk", 2))
 
         val updated = gateway.findBy(101000)!!
