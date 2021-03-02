@@ -45,6 +45,7 @@ subprojects {
                     }
                 }
         }
+        testLogging.showStandardStreams = true
     }
 
     repositories {
