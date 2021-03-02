@@ -45,8 +45,6 @@ subprojects {
                     }
                 }
         }
-//        testLogging.exceptionFormat = TestExceptionFormat.FULL
-        testLogging.showStandardStreams = true
     }
 
     repositories {

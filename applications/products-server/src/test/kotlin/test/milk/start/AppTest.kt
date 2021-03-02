@@ -55,7 +55,7 @@ class AppTest {
 
         with(engine) {
             with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
-                assertFalse(response.content!!.contains("27"))
+                assertFalse(response.content!!.contains("21"))
             }
         }
     }
@@ -66,7 +66,7 @@ class AppTest {
 
         with(engine) {
             with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
-                assertTrue(response.content!!.contains("27"))
+                assertTrue(response.content!!.contains("21"))
             }
         }
     }
@@ -75,7 +75,7 @@ class AppTest {
 
     private fun makePurchases(uri: String) {
         runBlocking {
-            (1..4).map {
+            (1..10).map {
                 async {
                     with(engine) {
                         with(handleRequest(HttpMethod.Post, uri) {
