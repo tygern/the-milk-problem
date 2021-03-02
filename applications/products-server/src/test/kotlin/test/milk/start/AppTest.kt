@@ -60,7 +60,7 @@ class AppTest {
         }
     }
 
-    @Ignore
+    @Test
     fun testCorrectQuantity() {
         makePurchases("/api/v2/products")
 
