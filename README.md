@@ -16,6 +16,15 @@ transaction (aka "dirty read").
 
 The below exercise introduces the reader to transactions while highlighting the challenges with dirty reads.
 
+### The Exercise
+
+Your assignment - get the tests to pass!
+
+- Remove dirty reads
+- Ensure the correct product quantities
+
+Hint: Look for todo items in the codebase
+
 ## Quick start
 
 The below sections walk through all the environment variables necessary to
@@ -94,3 +103,9 @@ Load a product scenario.
 ```bash
 psql -f applications/products-server/src/test/resources/scenarios/products.sql milk_development
 ```
+
+Hope you enjoy the exercise!
+
+Thanks, @barinek
+
+© 2021 by Continuum Collective, Inc. All rights reserved.
