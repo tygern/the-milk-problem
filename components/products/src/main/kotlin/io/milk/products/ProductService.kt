@@ -17,8 +17,7 @@ class ProductService(private val dataGateway: ProductDataGateway) {
         return findBy(record.id)
     }
 
-    fun decrementBy(purchase: PurchaseInfo) : ProductInfo {
-        val record = dataGateway.decrementBy(purchase)!!
-        return ProductInfo(record.id, record.name, record.quantity)
+    fun decrementBy(purchase: PurchaseInfo) {
+        // todo - use decrementBy
     }
 }

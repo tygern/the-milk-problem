@@ -1,6 +1,5 @@
 package test.milk.products
 
-
 import io.milk.database.DatabaseSupport
 import io.milk.database.DatabaseTemplate
 import io.milk.products.ProductDataGateway
@@ -63,16 +62,20 @@ class ProductDataGatewayTest {
     @Test
     fun decrementBy() {
         val gateway = ProductDataGateway(dataSource)
-        val product = gateway.decrementBy(PurchaseInfo(101000, "milk", 2))!!
-        assertEquals("milk", product.name)
-        assertEquals(40, product.quantity)
+        gateway.decrementBy(PurchaseInfo(101000, "milk", 2))
+
+        val updated = gateway.findBy(101000)!!
+        assertEquals("milk", updated.name)
+        assertEquals(40, updated.quantity)
     }
 
     @Test
     fun fasterDecrementBy() {
         val gateway = ProductDataGateway(dataSource)
-        val product = gateway.fasterDecrementBy(PurchaseInfo(101000, "milk", 2))!!
-        assertEquals("milk", product.name)
-        assertEquals(40, product.quantity)
+        gateway.fasterDecrementBy(PurchaseInfo(101000, "milk", 2))
+
+        val updated = gateway.findBy(101000)!!
+        assertEquals("milk", updated.name)
+        assertEquals(40, updated.quantity)
     }
 }

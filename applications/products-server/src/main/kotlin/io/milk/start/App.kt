@@ -4,6 +4,7 @@ import freemarker.cache.ClassTemplateLoader
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.freemarker.*
+import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.jackson.*
 import io.ktor.request.*
@@ -15,12 +16,9 @@ import io.milk.database.DatabaseSupport
 import io.milk.products.ProductDataGateway
 import io.milk.products.ProductService
 import io.milk.products.PurchaseInfo
-import org.slf4j.LoggerFactory
 import java.util.*
 
 fun Application.module() {
-    val logger = LoggerFactory.getLogger(this.javaClass)
-
     val dataSource = DatabaseSupport().setupDatabase()
     val productService = ProductService(ProductDataGateway(dataSource))
 
@@ -39,25 +37,11 @@ fun Application.module() {
         }
         post("/api/v1/products") {
             val purchase = call.receive<PurchaseInfo>()
-            logger.info("received purchase {} {}", purchase.name, purchase.amount)
 
-            val updated = productService.update(purchase)
+            productService.update(purchase) // todo - replace with decrementBy
 
-            logger.info("updated product {} {}", updated.name, updated.quantity)
-
-            call.respond(updated)
+            call.respond(HttpStatusCode.Created)
         }
-        post("/api/v2/products") {
-            val purchase = call.receive<PurchaseInfo>()
-            logger.info("received purchase {} {}", purchase.name, purchase.amount)
-
-            val updated = productService.decrementBy(purchase)
-
-            logger.info("updated product {} {}", updated.name, updated.quantity)
-
-            call.respond(updated)
-        }
-
         static("images") { resources("images") }
         static("style") { resources("style") }
     }

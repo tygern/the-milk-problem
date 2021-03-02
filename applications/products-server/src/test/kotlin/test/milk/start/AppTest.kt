@@ -50,19 +50,8 @@ class AppTest {
     }
 
     @Test
-    fun testIncorrectQuantity() {
+    fun testQuantity() {
         makePurchases("/api/v1/products")
-
-        with(engine) {
-            with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
-                assertFalse(response.content!!.contains("31"))
-            }
-        }
-    }
-
-    @Test
-    fun testCorrectQuantity() {
-        makePurchases("/api/v2/products")
 
         with(engine) {
             with(handleRequest(io.ktor.http.HttpMethod.Get, "/")) {
@@ -82,7 +71,7 @@ class AppTest {
                             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
                             setBody(mapper.writeValueAsString(PurchaseInfo(42, "milk", 1)))
                         }) {
-                            assertEquals(200, response.status()?.value)
+                            assertEquals(201, response.status()?.value)
                         }
                     }
                 }
