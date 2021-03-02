@@ -8,6 +8,7 @@ open class DatabaseSupport {
         dataSource.jdbcUrl = System.getenv("JDBC_DATABASE_URL")
         dataSource.username = System.getenv("JDBC_DATABASE_USERNAME")
         dataSource.password = System.getenv("JDBC_DATABASE_PASSWORD")
+        dataSource.maximumPoolSize = 5
         return dataSource
     }
 }
