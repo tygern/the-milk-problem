@@ -7,7 +7,7 @@ open class DatabaseSupport {
         val dataSource = HikariDataSource()
         dataSource.jdbcUrl = System.getenv("JDBC_DATABASE_URL")
         dataSource.username = System.getenv("JDBC_DATABASE_USERNAME")
-        dataSource.password = System.getenv("JDBC_DATABASE_USERNAME")
+        dataSource.password = System.getenv("JDBC_DATABASE_PASSWORD")
         return dataSource
     }
 }
