@@ -48,7 +48,7 @@ class AppTest {
         }
     }
 
-    @Ignore
+    @Test
     fun testIncorrectQuantity() {
         makePurchases("/api/v1/products")
 
@@ -59,7 +59,7 @@ class AppTest {
         }
     }
 
-    @Ignore
+    @Test
     fun testCorrectQuantity() {
         makePurchases("/api/v2/products")
 
